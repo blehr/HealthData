@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - health_data (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - health_data (from `.symlinks/plugins/health_data/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  health_data:
+    :path: ".symlinks/plugins/health_data/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  health_data: 782acec3c46928d997aafe4f074aa524fb0b49c4
+
+PODFILE CHECKSUM: c34e2287a9ccaa606aeceab922830efb9a6ff69a
+
+COCOAPODS: 1.8.4
