@@ -54,11 +54,9 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
             getDataCumulativeByDay(call: call, result: result)
         } else if (call.method.elementsEqual("getDataLatestAvailable")) {
             getDataLatestAvailable(call: call, result: result)
-        } else if (call.method.elementsEqual("getDataAveragedByDay")) {
-            getDataAveragedByDay(call: call, result: result)
         }
         else {
-            result("iOS " + UIDevice.current.systemVersion)
+            result(FlutterError(code: "HealthData", message: "Not Implemented \(call.method)", details: nil))
         }
         
         
@@ -86,7 +84,7 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
                 ])
                 result(toSend)
             }else{
-                result(FlutterError(code: "HealthData", message: "Results are null", details: error))
+                result(FlutterError(code: "HealthData", message: "Results are null \(dataTypeKey)", details: error))
             }
         }
         healthStore.execute(query)
@@ -127,7 +125,7 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
             query, results, error in
             
             guard let statsCollection = results else {
-                result(FlutterError(code: "HealthData", message: "Results are null", details: error))
+                result(FlutterError(code: "HealthData", message: "Results are null \(dataTypeKey)", details: error))
                 return
             }
             
@@ -154,70 +152,6 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
         healthStore.execute(query)
     }
     
-    func getDataAveragedByDay(call: FlutterMethodCall, result: @escaping FlutterResult) {
-           let arguments = call.arguments as? NSDictionary
-           let dataTypeKey = (arguments?["dataTypeKey"] as? String) ?? "DEFAULT"
-           let startDate = (arguments?["startDate"] as? NSNumber) ?? 0
-           let endDate = (arguments?["endDate"] as? NSNumber) ?? 0
-           
-           let dateFrom = Date(timeIntervalSince1970: startDate.doubleValue / 1000)
-           let dateTo = Date(timeIntervalSince1970: endDate.doubleValue / 1000)
-           
-           let dataType = dataTypeLookUp(key: dataTypeKey)
-            let unit = unitLookUp(key: dataTypeKey)
-           
-           let calendar = Calendar.current
-           
-           var interval = DateComponents()
-           interval.day = 1
-           
-           var anchorComponents = calendar.dateComponents([.day, .month, .year], from: Date())
-           
-           anchorComponents.hour = 0
-           
-           guard let anchorDate = calendar.date(from: anchorComponents) else {
-               return
-           }
-           
-           let query = HKStatisticsCollectionQuery(quantityType: dataType as! HKQuantityType,
-                                                   quantitySamplePredicate: nil,
-                                                   options: .discreteAverage,
-                                                   anchorDate: anchorDate,
-                                                   intervalComponents: interval as DateComponents)
-           
-           query.initialResultsHandler = {
-               query, results, error in
-               
-               guard let statsCollection = results else {
-                   result(FlutterError(code: "HealthData", message: "Results are null", details: error))
-                   return
-               }
-               
-               
-               var toSend = [Dictionary<String, Any>]()
-               
-               statsCollection.enumerateStatistics(from: dateFrom, to: dateTo) { statistics, stop in
-                if let quantity = statistics.averageQuantity() {
-                       let date = Int(statistics.startDate.timeIntervalSince1970 * 1000)
-                       print(date)
-                       let value = quantity.doubleValue(for: unit)
-                       
-                       toSend.append([
-                           "value": value,
-                           "date_from": date,
-                           "date_to": date
-                       ])
-                   }
-               }
-               
-               result(toSend)
-               return
-           }
-           healthStore.execute(query)
-       }
-    
-    
-    
     func getDataByStartAndEndDate(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? NSDictionary
         let dataTypeKey = (arguments?["dataTypeKey"] as? String) ?? "DEFAULT"
@@ -236,7 +170,7 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
             x, samplesOrNil, error in
             
             guard let samples = samplesOrNil as? [HKQuantitySample] else {
-                result(FlutterError(code: "HealthData", message: "Results are null", details: error))
+                result(FlutterError(code: "HealthData", message: "Results are null \(dataTypeKey)", details: error))
                 return
             }
             

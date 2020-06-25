@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:health_data/health_data_point.dart';
 import 'dart:io' show Platform;
 
 import 'package:intl/intl.dart';
@@ -13,6 +14,19 @@ class HealthDataNotAvailableException implements Exception {
   String toString() {
     return "Method ${_dataType.toString()} not implemented for platform ${_platformType.toString()}";
   }
+}
+
+class MaxAndMinHealthDataPoint {
+  String date;
+  HealthDataPoint min;
+  HealthDataPoint max;
+
+  MaxAndMinHealthDataPoint(this.date, this.max, this.min);
+
+  String toString() => '${this.runtimeType} - '
+      'date: $date, '
+      'min: $min, '
+      'max: $max, ';
 }
 
 /// Extracts the string value from an enum
@@ -127,52 +141,6 @@ const List<HealthDataType> _dataTypesAndroid = [
 
 enum PlatformType { IOS, ANDROID }
 
-/// A [HealthDataPoint] object corresponds to a data point captures from GoogleFit or Apple HealthKit
-class HealthDataPoint {
-  num value;
-  String unit;
-  int dateFrom;
-  int dateTo;
-  String dataType;
-  String platform;
-
-  HealthDataPoint(this.value, this.unit, this.dateFrom, this.dateTo,
-      this.dataType, this.platform);
-
-  HealthDataPoint.fromJson(Map<String, dynamic> json) {
-    try {
-      value = json['value'];
-      unit = json['unit'];
-      dateFrom = json['date_from'];
-      dateTo = json['date_to'];
-      dataType = json['data_type'];
-      platform = json['platform_type'];
-    } catch (error) {
-      print(error);
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['value'] = this.value;
-    data['unit'] = this.unit;
-    data['date_from'] = this.dateFrom;
-    data['date_to'] = this.dateTo;
-    data['data_type'] = this.dataType;
-    data['platform_type'] = this.platform;
-    return data;
-  }
-
-  String toString() => '${this.runtimeType} - '
-      'value: $value, '
-      'unit: $unit, '
-      'date_from: ${DateFormat.yMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(dateFrom))}, '
-      'dateFrom: $dateFrom, '
-      'dateTo: ${DateFormat.yMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(dateTo))}, '
-      'dataType: $dataType, '
-      'platform: $platform';
-}
-
 class HealthData {
   static const MethodChannel _channel = const MethodChannel('health_data');
   static PlatformType _platformType =
@@ -189,11 +157,6 @@ class HealthData {
     final bool isAuthorized =
         await _channel.invokeMethod('requestAuthorization');
     return isAuthorized;
-  }
-
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
   }
 
   static HealthDataPoint processDataPoint(
@@ -235,7 +198,6 @@ class HealthData {
     return [bmi];
   }
 
-  // Main function for fetching health data
   static Future<List<HealthDataPoint>> getDataByStartAndEndDate(
       DateTime startDate, DateTime endDate, HealthDataType dataType) async {
     // If not implemented on platform, throw an exception
@@ -300,38 +262,6 @@ class HealthData {
     return healthData;
   }
 
-  static Future<List<HealthDataPoint>> getDataAveragedByDay(
-      DateTime startDate, DateTime endDate, HealthDataType dataType) async {
-    // If not implemented on platform, throw an exception
-    if (!isDataTypeAvailable(dataType)) {
-      throw new HealthDataNotAvailableException(dataType, _platformType);
-    }
-
-    // Set parameters for method channel request
-    Map<String, dynamic> args = {
-      'dataTypeKey': enumToString(dataType),
-      'startDate': startDate.millisecondsSinceEpoch,
-      'endDate': endDate.millisecondsSinceEpoch
-    };
-
-    List<HealthDataPoint> healthData = new List();
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
-
-    try {
-      List fetchedDataPoints =
-          await _channel.invokeMethod('getDataAveragedByDay', args);
-
-      /// Process each data point received
-      for (var dataPoint in fetchedDataPoints) {
-        HealthDataPoint data = processDataPoint(dataPoint, dataType, unit);
-        healthData.add(data);
-      }
-    } catch (error) {
-      print(error);
-    }
-    return healthData;
-  }
-
   static Future<List<HealthDataPoint>> getDataLatestAvailable(
       HealthDataType dataType) async {
     // If not implemented on platform, throw an exception
@@ -368,5 +298,90 @@ class HealthData {
       print(error);
     }
     return healthData;
+  }
+
+  static bool isSameDay(DateTime curr, DateTime compare) {
+    if (curr.month == compare.month &&
+        curr.day == compare.day &&
+        curr.year == compare.year) {
+      return true;
+    }
+    return false;
+  }
+
+  static Future<List<MaxAndMinHealthDataPoint>> getMaxAndMinValueForEachDay(
+      DateTime startDate, DateTime endDate, HealthDataType dataType) async {
+    List<MaxAndMinHealthDataPoint> dataPoints = [];
+
+    try {
+      List<HealthDataPoint> list =
+          await getDataByStartAndEndDate(startDate, endDate, dataType);
+
+      List<Map<String, dynamic>> groups = groupByDay(list);
+
+      groups.forEach((m) {
+        List<HealthDataPoint> data = m["data"].cast<HealthDataPoint>();
+        data.sort((a, b) => a.value.compareTo(b.value));
+
+        dataPoints
+            .add(MaxAndMinHealthDataPoint(m["date"], data.last, data.first));
+      });
+    } catch (e) {
+      print("GET MAX AND MIN EXCEPTION FROM HEALTH DATA");
+      print(e.toString());
+    }
+
+    return dataPoints;
+  }
+
+  static List<Map<String, dynamic>> groupByDay(List<HealthDataPoint> list) {
+    List<Map<String, dynamic>> listOfMapByDay = [];
+    List<HealthDataPoint> temp = [];
+    DateTime currentDate;
+
+    list.forEach((d) {
+      // at first currentDate will be null
+      if (currentDate != null) {
+        // if d.dateFrom is not same day as currentDate
+        if (isSameDay(
+            currentDate, DateTime.fromMillisecondsSinceEpoch(d.dateFrom))) {
+          temp.add(d);
+        } else {
+          listOfMapByDay.add({
+            "date": DateFormat.yMd().format(currentDate),
+            "data": List.from(temp),
+          });
+          temp.clear();
+        }
+      }
+
+      // if temp isEmpty set the date and add d
+      if (temp.isEmpty) {
+        currentDate = DateTime.fromMillisecondsSinceEpoch(d.dateFrom);
+        temp.add(d);
+      }
+
+      // if this is the last item
+      if (list.indexOf(d) == list.length - 1) {
+        listOfMapByDay.add({
+          "date": DateFormat.yMd().format(currentDate),
+          "data": List.from(temp),
+        });
+      }
+    });
+
+    return listOfMapByDay;
+  }
+
+  static num convertKilogramsToPounds(num kValue) {
+    return kValue * 2.20462;
+  }
+
+  static num convertMetersToInches(num mValue) {
+    return mValue * 39.3701;
+  }
+
+  static num convertCelsiusToFahrenheit(num cValue) {
+    return (cValue * 1.8) + 32;
   }
 }

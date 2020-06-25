@@ -108,12 +108,6 @@ public class HealthDataPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
           .addDataType(getDataType(BLOOD_GLUCOSE), FitnessOptions.ACCESS_READ)
           .build()
 
-
-  fun MainThreadResult(result: Result) {
-    this.result = result
-    handler = Handler(Looper.getMainLooper())
-  }
-
   override fun success(p0: Any?) {
     handler?.post(
             Runnable { result?.success(p0) })
