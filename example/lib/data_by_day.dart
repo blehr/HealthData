@@ -1,7 +1,7 @@
 class DataByDay {
   int healthDataId;
-  DateTime dayOfRow;
-  DateTime dayCollected;
+  String dateOfData;
+  String dateCollected;
   num height;
   num weight;
   num bodyMassIndex;
@@ -9,9 +9,9 @@ class DataByDay {
   num waistCircumfrence;
   num restingHeartRate;
   num walkingHeartRate;
-  num totalSteps;
-  num totalActiveEnergyBurned;
-  num totalBasalEnergyBurned;
+  num steps;
+  num activeEnergyBurned;
+  num basalEnergyBurned;
   num systolicPressureMax;
   num systolicPressureMin;
   num diastolicPressureMax;
@@ -24,41 +24,47 @@ class DataByDay {
   num bloodOxygenMin;
   num bloodGlucoseMax;
   num bloodGlucoseMin;
+  num lowHeartRateEvent;
+  num highHeartRateEvent;
+  num irregularHeartRateEvent;
+  num electrodermalActivity;
   String createdBy;
   String updatedBy;
   String createDate;
   String updateDate;
 
-  DataByDay({
-    this.healthDataId,
-    this.dayOfRow,
-    this.dayCollected,
-    this.height,
-    this.weight,
-    this.bodyMassIndex,
-    this.bodyFatPercent,
-    this.waistCircumfrence,
-    this.restingHeartRate,
-    this.walkingHeartRate,
-    this.totalSteps,
-    this.totalActiveEnergyBurned,
-    this.totalBasalEnergyBurned,
-    this.systolicPressureMax,
-    this.systolicPressureMin,
-    this.diastolicPressureMax,
-    this.diastolicPressureMin,
-    this.heartRateMax,
-    this.heartRateMin,
-    this.bodyTemperatureMax,
-    this.bodyTemperatureMin,
-    this.bloodOxygenMax,
-    this.bloodOxygenMin,
-    this.bloodGlucoseMax,
-    this.bloodGlucoseMin,
-    this.createdBy,
-    this.createDate,
-    this.updatedBy,
-    this.updateDate
-  });
-
+  DataByDay(
+      {this.healthDataId,
+      this.dateOfData,
+      this.dateCollected,
+      this.height,
+      this.weight,
+      this.bodyMassIndex,
+      this.bodyFatPercent,
+      this.waistCircumfrence,
+      this.restingHeartRate,
+      this.walkingHeartRate,
+      this.steps,
+      this.activeEnergyBurned,
+      this.basalEnergyBurned,
+      this.systolicPressureMax,
+      this.systolicPressureMin,
+      this.diastolicPressureMax,
+      this.diastolicPressureMin,
+      this.heartRateMax,
+      this.heartRateMin,
+      this.bodyTemperatureMax,
+      this.bodyTemperatureMin,
+      this.bloodOxygenMax,
+      this.bloodOxygenMin,
+      this.bloodGlucoseMax,
+      this.bloodGlucoseMin,
+      this.lowHeartRateEvent,
+      this.highHeartRateEvent,
+      this.irregularHeartRateEvent,
+      this.electrodermalActivity,
+      this.createdBy,
+      this.createDate,
+      this.updatedBy,
+      this.updateDate});
 }

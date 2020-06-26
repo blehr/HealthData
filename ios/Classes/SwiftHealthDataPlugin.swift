@@ -74,8 +74,6 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
         let query = HKSampleQuery(sampleType: dataType as! HKSampleType, predicate: nil, limit: 1, sortDescriptors: [sort]) { (query, results, error) in
             if let resultNeeded = results?.first as? HKQuantitySample{
                 let unit = self.unitLookUp(key: dataTypeKey)
-                print("Height => \(resultNeeded.quantity.doubleValue(for: unit))")
-                
                 
                 toSend.append([
                     "value": resultNeeded.quantity.doubleValue(for: unit),
@@ -84,6 +82,7 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
                 ])
                 result(toSend)
             }else{
+
                 result(FlutterError(code: "HealthData", message: "Results are null \(dataTypeKey)", details: error))
             }
         }
@@ -135,7 +134,6 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
             statsCollection.enumerateStatistics(from: dateFrom, to: dateTo) { statistics, stop in
                 if let quantity = statistics.sumQuantity() {
                     let date = Int(statistics.startDate.timeIntervalSince1970 * 1000)
-                    print(date)
                     let value = quantity.doubleValue(for: unit)
                     
                     toSend.append([

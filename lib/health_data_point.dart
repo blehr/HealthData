@@ -19,13 +19,6 @@ class HealthDataPoint extends Equatable {
   factory HealthDataPoint.fromJson(Map<String, dynamic> json) {
     HealthDataPoint dataPoint;
     try {
-      // value = json['value'];
-      // unit = json['unit'];
-      // dateFrom = json['date_from'];
-      // dateTo = json['date_to'];
-      // dataType = json['data_type'];
-      // platform = json['platform_type'];
-
       dataPoint = HealthDataPoint(
           json['value'],
           json['unit'],

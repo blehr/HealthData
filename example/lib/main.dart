@@ -20,9 +20,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   List<HealthDataPoint> dataPointsLatest = [];
   List<HealthDataPoint> dataPointsCumulative = [];
+  List<HealthDataPoint> dataPointsAppleWatch = [];
   List<MaxAndMinHealthDataPoint> dataPointsMaxAndMin = [];
+  List<DataByDay> allData = [];
   bool _isAuthorized;
-  DataByDay latest = DataByDay();
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initPlatformState() async {
     DateTime now = DateTime.now().add(Duration(days: 1));
     DateTime endDate = DateTime(now.year, now.month, now.day, 0, 0);
-    DateTime startDate = endDate.add(Duration(days: -5));
+    DateTime startDate = endDate.add(Duration(days: -10));
 
     print("StartDate - ${DateFormat.yMd().add_jm().format(startDate)}");
     print("EndDate - ${DateFormat.yMd().add_jm().format(endDate)}");
@@ -47,87 +48,190 @@ class _MyAppState extends State<MyApp> {
       }
 
       // Platform messages may fail, so we use a try/catch PlatformException.
+
+      // get latest
       try {
-        // get latest
         List<HealthDataPoint> weight =
             await HealthData.getDataLatestAvailable(HealthDataType.WEIGHT);
+        dataPointsLatest.addAll(weight);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<HealthDataPoint> height =
             await HealthData.getDataLatestAvailable(HealthDataType.HEIGHT);
+        dataPointsLatest.addAll(height);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<HealthDataPoint> bodyFat = await HealthData.getDataLatestAvailable(
             HealthDataType.BODY_FAT_PERCENTAGE);
+        dataPointsLatest.addAll(bodyFat);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<HealthDataPoint> bmi = await HealthData.getDataLatestAvailable(
             HealthDataType.BODY_MASS_INDEX);
+        dataPointsLatest.addAll(bmi);
+      } catch (e) {
+        print(e.toString());
+      }
 
-        if (Platform.isIOS) {
+      if (Platform.isIOS) {
+        try {
           List<HealthDataPoint> waistCircumfrence =
               await HealthData.getDataLatestAvailable(
                   HealthDataType.WAIST_CIRCUMFERENCE);
+          dataPointsLatest.addAll(waistCircumfrence);
+        } catch (e) {
+          print(e.toString());
+        }
+
+        try {
           List<HealthDataPoint> restingHeartRate =
               await HealthData.getDataLatestAvailable(
                   HealthDataType.RESTING_HEART_RATE);
+          dataPointsLatest.addAll(restingHeartRate);
+        } catch (e) {
+          print(e.toString());
+        }
+
+        try {
           List<HealthDataPoint> walkingHeartRate =
               await HealthData.getDataLatestAvailable(
                   HealthDataType.WALKING_HEART_RATE);
-          dataPointsLatest.addAll(waistCircumfrence);
-          dataPointsLatest.addAll(restingHeartRate);
           dataPointsLatest.addAll(walkingHeartRate);
-
-          latest.waistCircumfrence = waistCircumfrence?.first?.value;
-          latest.restingHeartRate = restingHeartRate?.first?.value;
-          latest.walkingHeartRate = walkingHeartRate?.first?.value;
+        } catch (e) {
+          print(e.toString());
         }
+      }
 
-        dataPointsLatest.addAll(weight);
-        dataPointsLatest.addAll(height);
-        dataPointsLatest.addAll(bodyFat);
-        dataPointsLatest.addAll(bmi);
+      // get cumulative by day
 
-        // get cumulative by day
+      try {
         List<HealthDataPoint> steps = await HealthData.getDataCumulativeByDay(
             startDate, endDate, HealthDataType.STEPS);
+        dataPointsCumulative.addAll(steps);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<HealthDataPoint> activeEnergyBurned =
             await HealthData.getDataCumulativeByDay(
                 startDate, endDate, HealthDataType.ACTIVE_ENERGY_BURNED);
+        dataPointsCumulative.addAll(activeEnergyBurned);
+      } catch (e) {
+        print(e.toString());
+      }
 
-        if (Platform.isIOS) {
+      if (Platform.isIOS) {
+        try {
           List<HealthDataPoint> basalEnergyBurned =
               await HealthData.getDataCumulativeByDay(
                   startDate, endDate, HealthDataType.BASAL_ENERGY_BURNED);
 
           dataPointsCumulative.addAll(basalEnergyBurned);
+        } catch (e) {
+          print(e.toString());
         }
+      }
 
-        dataPointsCumulative.addAll(steps);
-        dataPointsCumulative.addAll(activeEnergyBurned);
-
-        // get max and min by day
+      // get max and min by day
+      try {
         List<MaxAndMinHealthDataPoint> systolic =
             await HealthData.getMaxAndMinValueForEachDay(
                 startDate, endDate, HealthDataType.BLOOD_PRESSURE_SYSTOLIC);
+        dataPointsMaxAndMin.addAll(systolic);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<MaxAndMinHealthDataPoint> diastolic =
             await HealthData.getMaxAndMinValueForEachDay(
                 startDate, endDate, HealthDataType.BLOOD_PRESSURE_DIASTOLIC);
+        dataPointsMaxAndMin.addAll(diastolic);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<MaxAndMinHealthDataPoint> heartRate =
             await HealthData.getMaxAndMinValueForEachDay(
                 startDate, endDate, HealthDataType.HEART_RATE);
+
+        dataPointsMaxAndMin.addAll(heartRate);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<MaxAndMinHealthDataPoint> bodyTemperauture =
             await HealthData.getMaxAndMinValueForEachDay(
                 startDate, endDate, HealthDataType.BODY_TEMPERATURE);
+        dataPointsMaxAndMin.addAll(bodyTemperauture);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<MaxAndMinHealthDataPoint> bloodOxygen =
             await HealthData.getMaxAndMinValueForEachDay(
                 startDate, endDate, HealthDataType.BLOOD_OXYGEN);
+        dataPointsMaxAndMin.addAll(bloodOxygen);
+      } catch (e) {
+        print(e.toString());
+      }
+
+      try {
         List<MaxAndMinHealthDataPoint> bloodGlucose =
             await HealthData.getMaxAndMinValueForEachDay(
                 startDate, endDate, HealthDataType.BLOOD_GLUCOSE);
-
-        dataPointsMaxAndMin.addAll(systolic);
-        dataPointsMaxAndMin.addAll(diastolic);
-        dataPointsMaxAndMin.addAll(heartRate);
-        dataPointsMaxAndMin.addAll(bodyTemperauture);
-        dataPointsMaxAndMin.addAll(bloodOxygen);
         dataPointsMaxAndMin.addAll(bloodGlucose);
-      } catch (exception) {
-        print(exception.toString());
+      } catch (e) {
+        print(e.toString());
+      }
+
+      // Apple Watch
+      if (Platform.isIOS) {
+        try {
+          List<HealthDataPoint> lowHR =
+              await HealthData.getDataByStartAndEndDate(
+                  startDate, endDate, HealthDataType.LOW_HEART_RATE_EVENT);
+          dataPointsAppleWatch.addAll(lowHR);
+        } catch (e) {
+          print(e.toString());
+        }
+        try {
+          List<HealthDataPoint> highHR =
+              await HealthData.getDataByStartAndEndDate(
+                  startDate, endDate, HealthDataType.HIGH_HEART_RATE_EVENT);
+          dataPointsAppleWatch.addAll(highHR);
+        } catch (e) {
+          print(e.toString());
+        }
+        try {
+          List<HealthDataPoint> irregularHR =
+              await HealthData.getDataByStartAndEndDate(startDate, endDate,
+                  HealthDataType.IRREGULAR_HEART_RATE_EVENT);
+          dataPointsAppleWatch.addAll(irregularHR);
+        } catch (e) {
+          print(e.toString());
+        }
+        try {
+          List<HealthDataPoint> electrodermal =
+              await HealthData.getDataByStartAndEndDate(
+                  startDate, endDate, HealthDataType.ELECTRODERMAL_ACTIVITY);
+          dataPointsAppleWatch.addAll(electrodermal);
+        } catch (e) {
+          print(e.toString());
+        }
       }
 
       /// Print the results
@@ -145,156 +249,322 @@ class _MyAppState extends State<MyApp> {
 
       if (!mounted) return;
 
+      mergeItAllTogether();
+
       setState(() {});
     });
   }
 
-  List<HealthDataType> _dataTypesIOS = [
-    HealthDataType.BODY_FAT_PERCENTAGE,
-    HealthDataType.HEIGHT,
-    HealthDataType.WEIGHT,
-    HealthDataType.BODY_MASS_INDEX,
-    HealthDataType.WAIST_CIRCUMFERENCE,
-    HealthDataType.STEPS,
-    HealthDataType.BASAL_ENERGY_BURNED,
-    HealthDataType.ACTIVE_ENERGY_BURNED,
-    HealthDataType.HEART_RATE,
-    HealthDataType.BODY_TEMPERATURE,
-    HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
-    HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-    HealthDataType.RESTING_HEART_RATE,
-    HealthDataType.WALKING_HEART_RATE,
-    HealthDataType.BLOOD_OXYGEN,
-    HealthDataType.BLOOD_GLUCOSE,
-    HealthDataType.ELECTRODERMAL_ACTIVITY,
-    HealthDataType.HIGH_HEART_RATE_EVENT,
-    HealthDataType.LOW_HEART_RATE_EVENT,
-    HealthDataType.IRREGULAR_HEART_RATE_EVENT
-  ];
-
-  String getDataByDayColumnName(String dataType) {
-    switch (dataType) {
+  DataByDay addDataToDay(HealthDataPoint d, DataByDay day) {
+    switch (d.dataType) {
       case "HEIGHT":
-        return "height";
+        day.height = d.value;
+        break;
       case "WEIGHT":
-        return "weight";
+        day.weight = d.value;
+        break;
       case "BODY_MASS_INDEX":
-        return "bodyMassIndex";
+        day.bodyMassIndex = d.value;
+        break;
       case "BODY_FAT_PERCENTAGE":
-        return "bodyFatPercent";
+        day.bodyFatPercent = d.value;
+        break;
       case "WAIST_CIRCUMFERENCE":
-        return "waistCircumfrence";
+        day.waistCircumfrence = d.value;
+        break;
       case "RESTING_HEART_RATE":
-        return "restingHeartRate";
-      case "RESTING_HEART_RATE":
-        return "WALKING_HEART_RATE";
+        day.restingHeartRate = d.value;
+        break;
+      case "WALKING_HEART_RATE":
+        day.walkingHeartRate = d.value;
+        break;
+      case "BASAL_ENERGY_BURNED":
+        day.basalEnergyBurned = d.value;
+        break;
+      case "ACTIVE_ENERGY_BURNED":
+        day.activeEnergyBurned = d.value;
+        break;
+      case "STEPS":
+        day.steps = d.value;
+        break;
+      case "LOW_HEART_RATE_EVENT":
+        day.lowHeartRateEvent = d.value;
+        break;
+      case "HIGH_HEART_RATE_EVENT":
+        day.highHeartRateEvent = d.value;
+        break;
+      case "IRREGULAR_HEART_RATE_EVENT":
+        day.irregularHeartRateEvent = d.value;
+        break;
+      case "ELECTRODERMAL_ACTIVITY":
+        day.electrodermalActivity = d.value;
+        break;
+
       default:
-        return "";
+        break;
     }
+
+    return day;
+  }
+
+  DataByDay addMaxMinDataToDay(MaxAndMinHealthDataPoint d, DataByDay day) {
+    switch (d.min.dataType) {
+      case "HEART_RATE":
+        day.heartRateMax = d.max.value;
+        day.heartRateMin = d.min.value;
+        break;
+      case "BODY_TEMPERATURE":
+        day.bodyTemperatureMax = d.max.value;
+        day.bodyTemperatureMin = d.min.value;
+        break;
+      case "BLOOD_OXYGEN":
+        day.bloodOxygenMax = d.max.value;
+        day.bloodOxygenMin = d.min.value;
+        break;
+      case "BLOOD_GLUCOSE":
+        day.bloodGlucoseMax = d.max.value;
+        day.bloodGlucoseMin = d.min.value;
+        break;
+      case "BLOOD_PRESSURE_SYSTOLIC":
+        day.systolicPressureMax = d.max.value;
+        day.systolicPressureMin = d.min.value;
+        break;
+      case "BLOOD_PRESSURE_DIASTOLIC":
+        day.diastolicPressureMax = d.max.value;
+        day.diastolicPressureMin = d.min.value;
+        break;
+      default:
+    }
+
+    return day;
   }
 
   mergeItAllTogether() {
-    List<DataByDay> allData = [];
-
     DataByDay latest = DataByDay();
+    var today = DateTime.now();
+    var todayMDY = DateFormat.yMd().format(today);
 
-    dataPointsLatest.forEach((d) { 
+    latest.dateCollected = todayMDY;
+    latest.dateOfData = todayMDY;
 
+    // handleLatestData
+    dataPointsLatest.forEach((d) {
+      addDataToDay(d, latest);
+    });
+
+    // add latest to allData
+    allData.add(latest);
+
+    // handle cumulative data
+    dataPointsCumulative.forEach((d) {
+      // is there a dataByDay with same date?
+      var dDate = DateFormat.yMd()
+          .format(DateTime.fromMillisecondsSinceEpoch(d.dateFrom));
+      var sameDay = allData.firstWhere((dbd) => dbd.dateOfData == dDate,
+          orElse: () => null);
+
+      if (sameDay != null) {
+        addDataToDay(d, sameDay);
+      } else {
+        DataByDay newDay = DataByDay();
+        newDay.dateCollected = todayMDY;
+        newDay.dateOfData = dDate;
+
+        var filledDataByDay = addDataToDay(d, newDay);
+        allData.add(filledDataByDay);
+      }
+    });
+
+    // handle max min data
+
+    dataPointsMaxAndMin.forEach((d) {
+      // is there a dataByDay with same date?
+      var dDate = DateFormat.yMd()
+          .format(DateTime.fromMillisecondsSinceEpoch(d.min.dateFrom));
+      var sameDay = allData.firstWhere((dbd) => dbd.dateOfData == dDate,
+          orElse: () => null);
+
+      if (sameDay != null) {
+        addMaxMinDataToDay(d, sameDay);
+      } else {
+        DataByDay newDay = DataByDay();
+        newDay.dateCollected = todayMDY;
+        newDay.dateOfData = dDate;
+
+        var filledDataByDay = addMaxMinDataToDay(d, newDay);
+        allData.add(filledDataByDay);
+      }
+    });
+
+    // apple watch
+    dataPointsAppleWatch.forEach((d) {
+      // is there a dataByDay with same date?
+      var dDate = DateFormat.yMd()
+          .format(DateTime.fromMillisecondsSinceEpoch(d.dateFrom));
+      var sameDay = allData.firstWhere((dbd) => dbd.dateOfData == dDate,
+          orElse: () => null);
+
+      if (sameDay != null) {
+        addDataToDay(d, sameDay);
+      } else {
+        DataByDay newDay = DataByDay();
+        newDay.dateCollected = todayMDY;
+        newDay.dateOfData = dDate;
+
+        var filledDataByDay = addDataToDay(d, newDay);
+        allData.add(filledDataByDay);
+      }
+    });
+
+    allData.sort((a, b) => DateFormat("M/d/yyyy")
+        .parse(b.dateOfData)
+        .compareTo(DateFormat("M/d/yyyy").parse(a.dateOfData)));
+
+    setState(() {
+      allData = allData;
     });
   }
 
   // convert values and units to standard
-  String getDisplayValue(HealthDataPoint d) {
-    if (d.unit == enumToString(HealthDataUnit.METERS)) {
-      return HealthData.convertMetersToInches(d.value).toStringAsFixed(2);
-    }
-    if (d.unit == enumToString(HealthDataUnit.KILOGRAMS)) {
-      return HealthData.convertKilogramsToPounds(d.value).toStringAsFixed(2);
-    }
-    if (d.unit == enumToString(HealthDataUnit.DEGREE_CELSIUS)) {
-      return HealthData.convertCelsiusToFahrenheit(d.value).toStringAsFixed(2);
-    }
-    if (d.unit == enumToString(HealthDataUnit.PERCENTAGE)) {
-      return (d.value * 100).toStringAsFixed(2);
-    }
+  // String getDisplayValue(HealthDataPoint d) {
+  //   if (d.unit == enumToString(HealthDataUnit.METERS)) {
+  //     return HealthData.convertMetersToInches(d.value).toStringAsFixed(2);
+  //   }
+  //   if (d.unit == enumToString(HealthDataUnit.KILOGRAMS)) {
+  //     return HealthData.convertKilogramsToPounds(d.value).toStringAsFixed(2);
+  //   }
+  //   if (d.unit == enumToString(HealthDataUnit.DEGREE_CELSIUS)) {
+  //     return HealthData.convertCelsiusToFahrenheit(d.value).toStringAsFixed(2);
+  //   }
+  //   if (d.unit == enumToString(HealthDataUnit.PERCENTAGE)) {
+  //     return (d.value * 100).toStringAsFixed(2);
+  //   }
 
-    return d.value.toStringAsFixed(2);
+  //   return d.value.toStringAsFixed(2);
+  // }
+
+  // String getDisplayUnit(HealthDataPoint d) {
+  //   if (d.unit == enumToString(HealthDataUnit.METERS)) {
+  //     return "INCHES";
+  //   }
+  //   if (d.unit == enumToString(HealthDataUnit.KILOGRAMS)) {
+  //     return "POUNDS";
+  //   }
+  //   if (d.unit == enumToString(HealthDataUnit.DEGREE_CELSIUS)) {
+  //     return "DEGREE_FAHRENHEIT";
+  //   }
+
+  //   return d.unit;
+  // }
+
+  // List<DataRow> _buildLatestDataPoints() {
+  //   return dataPointsLatest
+  //       .map(
+  //         (e) => DataRow(
+  //           cells: [
+  //             DataCell(
+  //               Text(
+  //                 DateFormat.yMd().format(
+  //                   DateTime.fromMillisecondsSinceEpoch(e.dateFrom),
+  //                 ),
+  //               ),
+  //             ),
+  //             DataCell(Text(e.dataType)),
+  //             DataCell(Text(getDisplayValue(e))),
+  //             DataCell(Text(getDisplayUnit(e))),
+  //           ],
+  //         ),
+  //       )
+  //       .toList();
+  // }
+
+  // List<DataRow> _buildMaxAndMinDataPoints() {
+  //   List<DataRow> rows = [];
+  //   dataPointsMaxAndMin.forEach((e) {
+  //     if (e.max == null || e.min == null) {
+  //       return;
+  //     }
+  //     var min = DataRow(
+  //       cells: [
+  //         DataCell(Text(e.date)),
+  //         DataCell(Text("${e.min.dataType}_MIN")),
+  //         DataCell(Text(getDisplayValue(e.min))),
+  //         DataCell(Text(getDisplayUnit(e.min))),
+  //       ],
+  //     );
+  //     var max = DataRow(
+  //       cells: [
+  //         DataCell(Text(e.date)),
+  //         DataCell(Text("${e.max.dataType}_MAX")),
+  //         DataCell(Text(getDisplayValue(e.max))),
+  //         DataCell(Text(getDisplayUnit(e.max))),
+  //       ],
+  //     );
+
+  //     rows.add(min);
+  //     rows.add(max);
+  //   });
+  //   return rows;
+  // }
+
+  // List<DataRow> _buildCumulativeDataPoints() {
+  //   return dataPointsCumulative
+  //       .map(
+  //         (e) => DataRow(
+  //           cells: [
+  //             DataCell(Text(DateFormat.yMd()
+  //                 .format(DateTime.fromMillisecondsSinceEpoch(e.dateFrom)))),
+  //             DataCell(Text(e.dataType)),
+  //             DataCell(Text(getDisplayValue(e))),
+  //             DataCell(Text(e.unit)),
+  //           ],
+  //         ),
+  //       )
+  //       .toList();
+  // }
+
+  String getValuesFixed(num value) {
+    if (value == null) {
+      return "";
+    }
+    return value.toStringAsFixed(2);
   }
 
-  String getDisplayUnit(HealthDataPoint d) {
-    if (d.unit == enumToString(HealthDataUnit.METERS)) {
-      return "INCHES";
+  List<DataRow> _buildAllData() {
+    if (allData.isEmpty) {
+      return [];
     }
-    if (d.unit == enumToString(HealthDataUnit.KILOGRAMS)) {
-      return "POUNDS";
-    }
-    if (d.unit == enumToString(HealthDataUnit.DEGREE_CELSIUS)) {
-      return "DEGREE_FAHRENHEIT";
-    }
-
-    return d.unit;
-  }
-
-  List<DataRow> _buildLatestDataPoints() {
-    return dataPointsLatest
+    return allData
         .map(
-          (e) => DataRow(
+          (d) => DataRow(
             cells: [
-              DataCell(
-                Text(
-                  DateFormat.yMd().format(
-                    DateTime.fromMillisecondsSinceEpoch(e.dateFrom),
-                  ),
-                ),
-              ),
-              DataCell(Text(e.dataType)),
-              DataCell(Text(getDisplayValue(e))),
-              DataCell(Text(getDisplayUnit(e))),
-            ],
-          ),
-        )
-        .toList();
-  }
-
-  List<DataRow> _buildMaxAndMinDataPoints() {
-    List<DataRow> rows = [];
-    dataPointsMaxAndMin.forEach((e) {
-      if (e.max == null || e.min == null) {
-        return;
-      }
-      var min = DataRow(
-        cells: [
-          DataCell(Text(e.date)),
-          DataCell(Text("${e.min.dataType}_MIN")),
-          DataCell(Text(getDisplayValue(e.min))),
-          DataCell(Text(getDisplayUnit(e.min))),
-        ],
-      );
-      var max = DataRow(
-        cells: [
-          DataCell(Text(e.date)),
-          DataCell(Text("${e.max.dataType}_MAX")),
-          DataCell(Text(getDisplayValue(e.max))),
-          DataCell(Text(getDisplayUnit(e.max))),
-        ],
-      );
-
-      rows.add(min);
-      rows.add(max);
-    });
-    return rows;
-  }
-
-  List<DataRow> _buildCumulativeDataPoints() {
-    return dataPointsCumulative
-        .map(
-          (e) => DataRow(
-            cells: [
-              DataCell(Text(DateFormat.yMd()
-                  .format(DateTime.fromMillisecondsSinceEpoch(e.dateFrom)))),
-              DataCell(Text(e.dataType)),
-              DataCell(Text(getDisplayValue(e))),
-              DataCell(Text(e.unit)),
+              DataCell(Text(d.dateOfData)),
+              DataCell(Text(getValuesFixed(d.height))),
+              DataCell(Text(getValuesFixed(d.weight))),
+              DataCell(Text(getValuesFixed(d.bodyMassIndex))),
+              DataCell(Text(getValuesFixed(d.bodyFatPercent))),
+              DataCell(Text(getValuesFixed(d.waistCircumfrence))),
+              DataCell(Text(getValuesFixed(d.steps))),
+              DataCell(Text(getValuesFixed(d.restingHeartRate))),
+              DataCell(Text(getValuesFixed(d.walkingHeartRate))),
+              DataCell(Text(getValuesFixed(d.heartRateMin))),
+              DataCell(Text(getValuesFixed(d.heartRateMax))),
+              DataCell(Text(getValuesFixed(d.activeEnergyBurned))),
+              DataCell(Text(getValuesFixed(d.basalEnergyBurned))),
+              DataCell(Text(getValuesFixed(d.systolicPressureMin))),
+              DataCell(Text(getValuesFixed(d.systolicPressureMax))),
+              DataCell(Text(getValuesFixed(d.diastolicPressureMin))),
+              DataCell(Text(getValuesFixed(d.diastolicPressureMax))),
+              DataCell(Text(getValuesFixed(d.bodyTemperatureMin))),
+              DataCell(Text(getValuesFixed(d.bodyTemperatureMax))),
+              DataCell(Text(getValuesFixed(d.bloodGlucoseMin))),
+              DataCell(Text(getValuesFixed(d.bloodGlucoseMax))),
+              DataCell(Text(getValuesFixed(d.bloodOxygenMin))),
+              DataCell(Text(getValuesFixed(d.bloodOxygenMax))),
+              DataCell(Text(getValuesFixed(d.lowHeartRateEvent))),
+              DataCell(Text(getValuesFixed(d.highHeartRateEvent))),
+              DataCell(Text(getValuesFixed(d.irregularHeartRateEvent))),
+              DataCell(Text(getValuesFixed(d.electrodermalActivity))),
             ],
           ),
         )
@@ -318,14 +588,38 @@ class _MyAppState extends State<MyApp> {
                   columnSpacing: 28,
                   columns: [
                     DataColumn(label: Text("Date")),
-                    DataColumn(label: Text("Type")),
-                    DataColumn(label: Text("Value")),
-                    DataColumn(label: Text("Unit")),
+                    DataColumn(label: Text("Height")),
+                    DataColumn(label: Text("Weight")),
+                    DataColumn(label: Text("BMI")),
+                    DataColumn(label: Text("BodyFat%")),
+                    DataColumn(label: Text("Waist Circ")),
+                    DataColumn(label: Text("Steps")),
+                    DataColumn(label: Text("Resting HeartRate")),
+                    DataColumn(label: Text("Walking HeartRate")),
+                    DataColumn(label: Text("Min HeartRate")),
+                    DataColumn(label: Text("Max HeartRate")),
+                    DataColumn(label: Text("Active Energy")),
+                    DataColumn(label: Text("Basal Energy")),
+                    DataColumn(label: Text("Min Systolic")),
+                    DataColumn(label: Text("Max Systolic")),
+                    DataColumn(label: Text("Min Diastolic")),
+                    DataColumn(label: Text("Max Diastolic")),
+                    DataColumn(label: Text("Min BodyTemp")),
+                    DataColumn(label: Text("Max BodyTemp")),
+                    DataColumn(label: Text("Min Blood Glucose")),
+                    DataColumn(label: Text("Max Blood Glucose")),
+                    DataColumn(label: Text("Min Blood Oxygen")),
+                    DataColumn(label: Text("Max Blood Oxygen")),
+                    DataColumn(label: Text("Low HeartRate Event")),
+                    DataColumn(label: Text("High HeartRate Event")),
+                    DataColumn(label: Text("Irregular HeartRate Event")),
+                    DataColumn(label: Text("Electrodermal Activity")),
                   ],
                   rows: [
-                    ..._buildLatestDataPoints(),
-                    ..._buildMaxAndMinDataPoints(),
-                    ..._buildCumulativeDataPoints(),
+                    ..._buildAllData(),
+                    // ..._buildLatestDataPoints(),
+                    // ..._buildMaxAndMinDataPoints(),
+                    // ..._buildCumulativeDataPoints(),
                   ],
                 ),
               ),
