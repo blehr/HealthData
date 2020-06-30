@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   List<HealthDataPoint> dataPointsCumulative = [];
   List<HealthDataPoint> dataPointsAppleWatch = [];
   List<MaxAndMinHealthDataPoint> dataPointsMaxAndMin = [];
-  List<DataByDay> allData = [];
+  List<DataByDate> allData = [];
   bool _isAuthorized;
 
   @override
@@ -255,7 +255,7 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  DataByDay addDataToDay(HealthDataPoint d, DataByDay day) {
+  DataByDate addDataToDay(HealthDataPoint d, DataByDate day) {
     switch (d.dataType) {
       case "HEIGHT":
         day.height = d.value;
@@ -307,7 +307,7 @@ class _MyAppState extends State<MyApp> {
     return day;
   }
 
-  DataByDay addMaxMinDataToDay(MaxAndMinHealthDataPoint d, DataByDay day) {
+  DataByDate addMaxMinDataToDay(MaxAndMinHealthDataPoint d, DataByDate day) {
     switch (d.min.dataType) {
       case "HEART_RATE":
         day.heartRateMax = d.max.value;
@@ -340,12 +340,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   mergeItAllTogether() {
-    DataByDay latest = DataByDay();
+    DataByDate latest = DataByDate();
     var today = DateTime.now();
     var todayMDY = DateFormat.yMd().format(today);
 
     latest.dateCollected = todayMDY;
-    latest.dateOfData = todayMDY;
+    latest.recordDate = todayMDY;
 
     // handleLatestData
     dataPointsLatest.forEach((d) {
@@ -360,15 +360,15 @@ class _MyAppState extends State<MyApp> {
       // is there a dataByDay with same date?
       var dDate = DateFormat.yMd()
           .format(DateTime.fromMillisecondsSinceEpoch(d.dateFrom));
-      var sameDay = allData.firstWhere((dbd) => dbd.dateOfData == dDate,
+      var sameDay = allData.firstWhere((dbd) => dbd.recordDate == dDate,
           orElse: () => null);
 
       if (sameDay != null) {
         addDataToDay(d, sameDay);
       } else {
-        DataByDay newDay = DataByDay();
+        DataByDate newDay = DataByDate();
         newDay.dateCollected = todayMDY;
-        newDay.dateOfData = dDate;
+        newDay.recordDate = dDate;
 
         var filledDataByDay = addDataToDay(d, newDay);
         allData.add(filledDataByDay);
@@ -381,15 +381,15 @@ class _MyAppState extends State<MyApp> {
       // is there a dataByDay with same date?
       var dDate = DateFormat.yMd()
           .format(DateTime.fromMillisecondsSinceEpoch(d.min.dateFrom));
-      var sameDay = allData.firstWhere((dbd) => dbd.dateOfData == dDate,
+      var sameDay = allData.firstWhere((dbd) => dbd.recordDate == dDate,
           orElse: () => null);
 
       if (sameDay != null) {
         addMaxMinDataToDay(d, sameDay);
       } else {
-        DataByDay newDay = DataByDay();
+        DataByDate newDay = DataByDate();
         newDay.dateCollected = todayMDY;
-        newDay.dateOfData = dDate;
+        newDay.recordDate = dDate;
 
         var filledDataByDay = addMaxMinDataToDay(d, newDay);
         allData.add(filledDataByDay);
@@ -401,15 +401,15 @@ class _MyAppState extends State<MyApp> {
       // is there a dataByDay with same date?
       var dDate = DateFormat.yMd()
           .format(DateTime.fromMillisecondsSinceEpoch(d.dateFrom));
-      var sameDay = allData.firstWhere((dbd) => dbd.dateOfData == dDate,
+      var sameDay = allData.firstWhere((dbd) => dbd.recordDate == dDate,
           orElse: () => null);
 
       if (sameDay != null) {
         addDataToDay(d, sameDay);
       } else {
-        DataByDay newDay = DataByDay();
+        DataByDate newDay = DataByDate();
         newDay.dateCollected = todayMDY;
-        newDay.dateOfData = dDate;
+        newDay.recordDate = dDate;
 
         var filledDataByDay = addDataToDay(d, newDay);
         allData.add(filledDataByDay);
@@ -417,111 +417,13 @@ class _MyAppState extends State<MyApp> {
     });
 
     allData.sort((a, b) => DateFormat("M/d/yyyy")
-        .parse(b.dateOfData)
-        .compareTo(DateFormat("M/d/yyyy").parse(a.dateOfData)));
+        .parse(b.recordDate)
+        .compareTo(DateFormat("M/d/yyyy").parse(a.recordDate)));
 
     setState(() {
       allData = allData;
     });
   }
-
-  // convert values and units to standard
-  // String getDisplayValue(HealthDataPoint d) {
-  //   if (d.unit == enumToString(HealthDataUnit.METERS)) {
-  //     return HealthData.convertMetersToInches(d.value).toStringAsFixed(2);
-  //   }
-  //   if (d.unit == enumToString(HealthDataUnit.KILOGRAMS)) {
-  //     return HealthData.convertKilogramsToPounds(d.value).toStringAsFixed(2);
-  //   }
-  //   if (d.unit == enumToString(HealthDataUnit.DEGREE_CELSIUS)) {
-  //     return HealthData.convertCelsiusToFahrenheit(d.value).toStringAsFixed(2);
-  //   }
-  //   if (d.unit == enumToString(HealthDataUnit.PERCENTAGE)) {
-  //     return (d.value * 100).toStringAsFixed(2);
-  //   }
-
-  //   return d.value.toStringAsFixed(2);
-  // }
-
-  // String getDisplayUnit(HealthDataPoint d) {
-  //   if (d.unit == enumToString(HealthDataUnit.METERS)) {
-  //     return "INCHES";
-  //   }
-  //   if (d.unit == enumToString(HealthDataUnit.KILOGRAMS)) {
-  //     return "POUNDS";
-  //   }
-  //   if (d.unit == enumToString(HealthDataUnit.DEGREE_CELSIUS)) {
-  //     return "DEGREE_FAHRENHEIT";
-  //   }
-
-  //   return d.unit;
-  // }
-
-  // List<DataRow> _buildLatestDataPoints() {
-  //   return dataPointsLatest
-  //       .map(
-  //         (e) => DataRow(
-  //           cells: [
-  //             DataCell(
-  //               Text(
-  //                 DateFormat.yMd().format(
-  //                   DateTime.fromMillisecondsSinceEpoch(e.dateFrom),
-  //                 ),
-  //               ),
-  //             ),
-  //             DataCell(Text(e.dataType)),
-  //             DataCell(Text(getDisplayValue(e))),
-  //             DataCell(Text(getDisplayUnit(e))),
-  //           ],
-  //         ),
-  //       )
-  //       .toList();
-  // }
-
-  // List<DataRow> _buildMaxAndMinDataPoints() {
-  //   List<DataRow> rows = [];
-  //   dataPointsMaxAndMin.forEach((e) {
-  //     if (e.max == null || e.min == null) {
-  //       return;
-  //     }
-  //     var min = DataRow(
-  //       cells: [
-  //         DataCell(Text(e.date)),
-  //         DataCell(Text("${e.min.dataType}_MIN")),
-  //         DataCell(Text(getDisplayValue(e.min))),
-  //         DataCell(Text(getDisplayUnit(e.min))),
-  //       ],
-  //     );
-  //     var max = DataRow(
-  //       cells: [
-  //         DataCell(Text(e.date)),
-  //         DataCell(Text("${e.max.dataType}_MAX")),
-  //         DataCell(Text(getDisplayValue(e.max))),
-  //         DataCell(Text(getDisplayUnit(e.max))),
-  //       ],
-  //     );
-
-  //     rows.add(min);
-  //     rows.add(max);
-  //   });
-  //   return rows;
-  // }
-
-  // List<DataRow> _buildCumulativeDataPoints() {
-  //   return dataPointsCumulative
-  //       .map(
-  //         (e) => DataRow(
-  //           cells: [
-  //             DataCell(Text(DateFormat.yMd()
-  //                 .format(DateTime.fromMillisecondsSinceEpoch(e.dateFrom)))),
-  //             DataCell(Text(e.dataType)),
-  //             DataCell(Text(getDisplayValue(e))),
-  //             DataCell(Text(e.unit)),
-  //           ],
-  //         ),
-  //       )
-  //       .toList();
-  // }
 
   String getValuesFixed(num value) {
     if (value == null) {
@@ -538,7 +440,7 @@ class _MyAppState extends State<MyApp> {
         .map(
           (d) => DataRow(
             cells: [
-              DataCell(Text(d.dateOfData)),
+              DataCell(Text(d.recordDate)),
               DataCell(Text(getValuesFixed(d.height))),
               DataCell(Text(getValuesFixed(d.weight))),
               DataCell(Text(getValuesFixed(d.bodyMassIndex))),
@@ -617,9 +519,6 @@ class _MyAppState extends State<MyApp> {
                   ],
                   rows: [
                     ..._buildAllData(),
-                    // ..._buildLatestDataPoints(),
-                    // ..._buildMaxAndMinDataPoints(),
-                    // ..._buildCumulativeDataPoints(),
                   ],
                 ),
               ),

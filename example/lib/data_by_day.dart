@@ -1,23 +1,24 @@
-class DataByDay {
+class DataByDate {
   int healthDataId;
-  String dateOfData;
+  int injuryId;
+  String recordDate;
   String dateCollected;
   num height;
   num weight;
   num bodyMassIndex;
   num bodyFatPercent;
   num waistCircumfrence;
-  num restingHeartRate;
-  num walkingHeartRate;
-  num steps;
+  int restingHeartRate;
+  int walkingHeartRate;
+  int steps;
   num activeEnergyBurned;
   num basalEnergyBurned;
-  num systolicPressureMax;
-  num systolicPressureMin;
-  num diastolicPressureMax;
-  num diastolicPressureMin;
-  num heartRateMax;
-  num heartRateMin;
+  int systolicPressureMax;
+  int systolicPressureMin;
+  int diastolicPressureMax;
+  int diastolicPressureMin;
+  int heartRateMax;
+  int heartRateMin;
   num bodyTemperatureMax;
   num bodyTemperatureMin;
   num bloodOxygenMax;
@@ -33,9 +34,9 @@ class DataByDay {
   String createDate;
   String updateDate;
 
-  DataByDay(
+  DataByDate(
       {this.healthDataId,
-      this.dateOfData,
+      this.recordDate,
       this.dateCollected,
       this.height,
       this.weight,
