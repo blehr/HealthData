@@ -35,8 +35,11 @@ public class HealthDataPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
 
   private lateinit var channel : MethodChannel
-  private var context: Context? = null
-  private var activity: Activity? = null
+  // private var context: Context? = null
+  // private var activity: Activity? = null
+
+  private lateinit var context: Context
+  private lateinit var activity: Activity
 
 
   private var result: Result? = null
@@ -68,6 +71,7 @@ public class HealthDataPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "health_data")
     channel.setMethodCallHandler(this);
+    context = flutterPluginBinding.applicationContext
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
