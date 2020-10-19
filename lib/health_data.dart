@@ -281,7 +281,7 @@ class HealthData {
 
     try {
       List fetchedDataPoints =
-          await _channel.invokeMethod('getDataAverageByWeeek', args);
+          await _channel.invokeMethod('getDataAverageByWeek', args);
 
       /// Process each data point received
       for (var dataPoint in fetchedDataPoints) {
