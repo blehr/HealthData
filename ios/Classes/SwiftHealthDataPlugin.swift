@@ -56,6 +56,8 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
             getDataLatestAvailable(call: call, result: result)
         } else if (call.method.elementsEqual("getDataAverageByWeek")) {
             getDataAverageByWeek(call: call, result: result)
+        } else if (call.method.elementsEqual("getDataAverageByMonth")) {
+            getDataAverageByMonth(call: call, result: result)
         } else {
             result(FlutterError(code: "HealthData", message: "Not Implemented \(call.method)", details: nil))
         }
@@ -172,6 +174,72 @@ public class SwiftHealthDataPlugin: NSObject, FlutterPlugin {
         // start from sunday
         let offset = (7 + anchorComponents.weekday! - 1) % 7
         anchorComponents.day! -= offset
+        
+        anchorComponents.hour = 0
+        
+        guard let anchorDate = calendar.date(from: anchorComponents) else {
+            return
+        }
+        
+        let query = HKStatisticsCollectionQuery(quantityType: dataType as! HKQuantityType,
+                                                quantitySamplePredicate: nil,
+                                                options: .discreteAverage,
+                                                anchorDate: anchorDate,
+                                                intervalComponents: interval as DateComponents)
+        
+        query.initialResultsHandler = {
+            query, results, error in
+            
+            guard let statsCollection = results else {
+                result(FlutterError(code: "HealthData", message: "Results are null \(dataTypeKey)", details: error))
+                return
+            }
+            
+            
+            var toSend = [Dictionary<String, Any>]()
+            
+            statsCollection.enumerateStatistics(from: dateFrom, to: dateTo) { statistics, stop in
+                if let quantity = statistics.averageQuantity() {
+                    let startDate = Int(statistics.startDate.timeIntervalSince1970 * 1000)
+                    let endDate = Int(statistics.endDate.timeIntervalSince1970 * 1000)
+                    let value = quantity.doubleValue(for: unit)
+                    
+                    toSend.append([
+                        "value": value,
+                        "date_from": startDate,
+                        "date_to": endDate
+                    ])
+                }
+            }
+            
+            result(toSend)
+            return
+        }
+        healthStore.execute(query)
+    }
+
+    func getDataAverageByMonth(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let arguments = call.arguments as? NSDictionary
+        let dataTypeKey = (arguments?["dataTypeKey"] as? String) ?? "DEFAULT"
+        let startDate = (arguments?["startDate"] as? NSNumber) ?? 0
+        let endDate = (arguments?["endDate"] as? NSNumber) ?? 0
+        
+        let dateFrom = Date(timeIntervalSince1970: startDate.doubleValue / 1000)
+        let dateTo = Date(timeIntervalSince1970: endDate.doubleValue / 1000)
+        
+        let dataType = dataTypeLookUp(key: dataTypeKey)
+        let unit = unitLookUp(key: dataTypeKey)
+        
+        let calendar = Calendar.current
+        
+        var interval = DateComponents()
+        interval.month = 1
+        
+        var anchorComponents = calendar.dateComponents([.day, .month, .year, .weekday], from: Date())
+
+        // start from sunday
+        // let offset = (7 + anchorComponents.weekday! - 1) % 7
+        anchorComponents.day = 1
         
         anchorComponents.hour = 0
         
