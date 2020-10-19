@@ -262,6 +262,38 @@ class HealthData {
     return healthData;
   }
 
+  static Future<List<HealthDataPoint>> getDataAverageByWeek(
+      DateTime startDate, DateTime endDate, HealthDataType dataType) async {
+    // If not implemented on platform, throw an exception
+    if (!isDataTypeAvailable(dataType)) {
+      throw new HealthDataNotAvailableException(dataType, _platformType);
+    }
+
+    // Set parameters for method channel request
+    Map<String, dynamic> args = {
+      'dataTypeKey': enumToString(dataType),
+      'startDate': startDate.millisecondsSinceEpoch,
+      'endDate': endDate.millisecondsSinceEpoch
+    };
+
+    List<HealthDataPoint> healthData = new List();
+    HealthDataUnit unit = _dataTypeToUnit[dataType];
+
+    try {
+      List fetchedDataPoints =
+          await _channel.invokeMethod('getDataAverageByWeeek', args);
+
+      /// Process each data point received
+      for (var dataPoint in fetchedDataPoints) {
+        HealthDataPoint data = processDataPoint(dataPoint, dataType, unit);
+        healthData.add(data);
+      }
+    } catch (error) {
+      print(error);
+    }
+    return healthData;
+  }
+
   static Future<List<HealthDataPoint>> getDataLatestAvailable(
       HealthDataType dataType) async {
     // If not implemented on platform, throw an exception

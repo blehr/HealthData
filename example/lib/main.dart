@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initPlatformState() async {
     DateTime now = DateTime.now().add(Duration(days: 1));
     DateTime endDate = DateTime(now.year, now.month, now.day, 0, 0);
-    DateTime startDate = endDate.add(Duration(days: -10));
+    DateTime startDate = endDate.add(Duration(days: -90));
 
     print("StartDate - ${DateFormat.yMd().add_jm().format(startDate)}");
     print("EndDate - ${DateFormat.yMd().add_jm().format(endDate)}");

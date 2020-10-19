@@ -1,6 +1,6 @@
 class DataByDate {
-  int healthDataId;
-  int injuryId;
+  num healthDataId;
+  num injuryId;
   String recordDate;
   String dateCollected;
   num height;
@@ -8,17 +8,17 @@ class DataByDate {
   num bodyMassIndex;
   num bodyFatPercent;
   num waistCircumfrence;
-  int restingHeartRate;
-  int walkingHeartRate;
-  int steps;
+  num restingHeartRate;
+  num walkingHeartRate;
+  num steps;
   num activeEnergyBurned;
   num basalEnergyBurned;
-  int systolicPressureMax;
-  int systolicPressureMin;
-  int diastolicPressureMax;
-  int diastolicPressureMin;
-  int heartRateMax;
-  int heartRateMin;
+  num systolicPressureMax;
+  num systolicPressureMin;
+  num diastolicPressureMax;
+  num diastolicPressureMin;
+  num heartRateMax;
+  num heartRateMin;
   num bodyTemperatureMax;
   num bodyTemperatureMin;
   num bloodOxygenMax;
