@@ -335,14 +335,23 @@ public class HealthDataPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-    if (resultCode == Activity.RESULT_OK) {
-      if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
+    if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
+      if (resultCode == Activity.RESULT_OK) {
         Log.d("HEALTH_DATA", "Access Granted!")
         mResult?.success(true)
-      } else {
+      } else if (resultCode == Activity.RESULT_CANCELED) {
         Log.d("HEALTH_DATA", "Access Denied!")
+        mResult?.success(false);
       }
     }
+    // if (resultCode == Activity.RESULT_OK) {
+    //   if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
+    //     Log.d("HEALTH_DATA", "Access Granted!")
+    //     mResult?.success(true)
+    //   } else {
+    //     Log.d("HEALTH_DATA", "Access Denied!")
+    //   }
+    // }
     return false
   }
 
