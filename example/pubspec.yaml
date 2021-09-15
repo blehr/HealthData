@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.15.1
+  intl: ^0.17.0
 
   health_data:
     # When depending on this package from a real application you should use:
