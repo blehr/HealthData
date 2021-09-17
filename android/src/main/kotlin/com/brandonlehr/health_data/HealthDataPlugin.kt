@@ -318,7 +318,7 @@ public class HealthDataPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
 
   override fun onDetachedFromActivity() {
-    TODO("Not yet implemented")
+    
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
