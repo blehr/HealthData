@@ -17,7 +17,7 @@ class HealthDataNotAvailableException implements Exception {
 }
 
 class MaxAndMinHealthDataPoint {
-  String date;
+  String? date;
   HealthDataPoint min;
   HealthDataPoint max;
 
@@ -153,14 +153,14 @@ class HealthData {
           : _dataTypesIOS.contains(dataType);
 
   // Request access to GoogleFit/Apple HealthKit
-  static Future<bool> requestAuthorization() async {
-    final bool isAuthorized =
+  static Future<bool?> requestAuthorization() async {
+    final bool? isAuthorized =
         await _channel.invokeMethod('requestAuthorization');
     return isAuthorized;
   }
 
   static HealthDataPoint processDataPoint(
-      var dataPoint, HealthDataType dataType, HealthDataUnit unit) {
+      var dataPoint, HealthDataType dataType, HealthDataUnit? unit) {
     // Set the platform_type and data_type fields
     dataPoint["platform_type"] = _platformType.toString();
 
@@ -182,10 +182,10 @@ class HealthData {
         await getDataLatestAvailable(HealthDataType.WEIGHT);
 
     num bmiValue =
-        weights.last.value / (heights.last.value * heights.last.value);
+        weights.last.value! / (heights.last.value! * heights.last.value!);
 
     HealthDataType dataType = HealthDataType.BODY_MASS_INDEX;
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
+    HealthDataUnit? unit = _dataTypeToUnit[dataType];
 
     HealthDataPoint bmi = HealthDataPoint(
         bmiValue,
@@ -213,11 +213,11 @@ class HealthData {
     };
 
     List<HealthDataPoint> healthData = [];
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
+    HealthDataUnit? unit = _dataTypeToUnit[dataType];
 
     try {
       List fetchedDataPoints =
-          await _channel.invokeMethod('getDataByStartAndEndDate', args);
+          await (_channel.invokeMethod('getDataByStartAndEndDate', args) as FutureOr<List<dynamic>>);
 
       /// Process each data point received
       for (var dataPoint in fetchedDataPoints) {
@@ -245,11 +245,11 @@ class HealthData {
     };
 
     List<HealthDataPoint> healthData = [];
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
+    HealthDataUnit? unit = _dataTypeToUnit[dataType];
 
     try {
       List fetchedDataPoints =
-          await _channel.invokeMethod('getDataCumulativeByDay', args);
+          await (_channel.invokeMethod('getDataCumulativeByDay', args) as FutureOr<List<dynamic>>);
 
       /// Process each data point received
       for (var dataPoint in fetchedDataPoints) {
@@ -277,11 +277,11 @@ class HealthData {
     };
 
     List<HealthDataPoint> healthData = [];
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
+    HealthDataUnit? unit = _dataTypeToUnit[dataType];
 
     try {
       List fetchedDataPoints =
-          await _channel.invokeMethod('getDataAverageByWeek', args);
+          await (_channel.invokeMethod('getDataAverageByWeek', args) as FutureOr<List<dynamic>>);
 
       /// Process each data point received
       for (var dataPoint in fetchedDataPoints) {
@@ -309,11 +309,11 @@ class HealthData {
     };
 
     List<HealthDataPoint> healthData = [];
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
+    HealthDataUnit? unit = _dataTypeToUnit[dataType];
 
     try {
       List fetchedDataPoints =
-          await _channel.invokeMethod('getDataAverageByMonth', args);
+          await (_channel.invokeMethod('getDataAverageByMonth', args) as FutureOr<List<dynamic>>);
 
       /// Process each data point received
       for (var dataPoint in fetchedDataPoints) {
@@ -347,11 +347,11 @@ class HealthData {
     };
 
     List<HealthDataPoint> healthData = [];
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
+    HealthDataUnit? unit = _dataTypeToUnit[dataType];
 
     try {
       List fetchedDataPoints =
-          await _channel.invokeMethod('getDataLatestAvailable', args);
+          await (_channel.invokeMethod('getDataLatestAvailable', args) as FutureOr<List<dynamic>>);
 
       /// Process each data point received
       for (var dataPoint in fetchedDataPoints) {
@@ -385,7 +385,7 @@ class HealthData {
 
       groups.forEach((m) {
         List<HealthDataPoint> data = m["data"].cast<HealthDataPoint>();
-        data.sort((a, b) => a.value.compareTo(b.value));
+        data.sort((a, b) => a.value!.compareTo(b.value!));
 
         dataPoints
             .add(MaxAndMinHealthDataPoint(m["date"], data.last, data.first));
@@ -401,18 +401,18 @@ class HealthData {
   static List<Map<String, dynamic>> groupByDay(List<HealthDataPoint> list) {
     List<Map<String, dynamic>> listOfMapByDay = [];
     List<HealthDataPoint> temp = [];
-    DateTime currentDate;
+    DateTime? currentDate;
 
     list.forEach((d) {
       // at first currentDate will be null
       if (currentDate != null) {
         // if d.dateFrom is not same day as currentDate
         if (isSameDay(
-            currentDate, DateTime.fromMillisecondsSinceEpoch(d.dateFrom))) {
+            currentDate!, DateTime.fromMillisecondsSinceEpoch(d.dateFrom!))) {
           temp.add(d);
         } else {
           listOfMapByDay.add({
-            "date": DateFormat.yMd().format(currentDate),
+            "date": DateFormat.yMd().format(currentDate!),
             "data": List.from(temp),
           });
           temp.clear();
@@ -421,14 +421,14 @@ class HealthData {
 
       // if temp isEmpty set the date and add d
       if (temp.isEmpty) {
-        currentDate = DateTime.fromMillisecondsSinceEpoch(d.dateFrom);
+        currentDate = DateTime.fromMillisecondsSinceEpoch(d.dateFrom!);
         temp.add(d);
       }
 
       // if this is the last item
       if (list.indexOf(d) == list.length - 1) {
         listOfMapByDay.add({
-          "date": DateFormat.yMd().format(currentDate),
+          "date": DateFormat.yMd().format(currentDate!),
           "data": List.from(temp),
         });
       }

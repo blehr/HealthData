@@ -3,21 +3,21 @@ import 'package:intl/intl.dart';
 
 /// A [HealthDataPoint] object corresponds to a data point captures from GoogleFit or Apple HealthKit
 class HealthDataPoint extends Equatable {
-  final num value;
-  final String unit;
-  final int dateFrom;
-  final int dateTo;
-  final String dataType;
-  final String platform;
+  final num? value;
+  final String? unit;
+  final int? dateFrom;
+  final int? dateTo;
+  final String? dataType;
+  final String? platform;
 
   HealthDataPoint(this.value, this.unit, this.dateFrom, this.dateTo,
       this.dataType, this.platform);
 
   @override
-  List<Object> get props => [value, unit, dateFrom, dateTo, dataType, platform];
+  List<Object?> get props => [value, unit, dateFrom, dateTo, dataType, platform];
 
   factory HealthDataPoint.fromJson(Map<String, dynamic> json) {
-    HealthDataPoint dataPoint;
+    late HealthDataPoint dataPoint;
     try {
       dataPoint = HealthDataPoint(
           json['value'],
@@ -46,9 +46,9 @@ class HealthDataPoint extends Equatable {
   String toString() => '${this.runtimeType} - '
       'value: $value, '
       'unit: $unit, '
-      'date_from: ${DateFormat.yMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(dateFrom))}, '
+      'date_from: ${DateFormat.yMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(dateFrom!))}, '
       'dateFrom: $dateFrom, '
-      'dateTo: ${DateFormat.yMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(dateTo))}, '
+      'dateTo: ${DateFormat.yMd().add_jm().format(DateTime.fromMillisecondsSinceEpoch(dateTo!))}, '
       'dataType: $dataType, '
       'platform: $platform';
 }
